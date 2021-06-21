@@ -18,8 +18,8 @@ class ViewController: UIViewController {
         fetchImage(with: url)
         
         imageView.translatesAutoresizingMaskIntoConstraints = false
-//        imageView.image = catPic
-        //imageView.backgroundColor = .blue
+        imageView.contentMode = .scaleAspectFill
+        imageView.clipsToBounds = true
         view.addSubview(imageView)
         
         NSLayoutConstraint.activate([
@@ -41,7 +41,7 @@ class ViewController: UIViewController {
             URLSession.shared.dataTask(with: urlRequest) { [self] (data, response, error) in
                 if let error = error {
                     print("Error: \(error)")
-                    } else if let data = data {
+                } else if let data = data {
                     DispatchQueue.main.async {
                         self.catPic = UIImage(data: data)!
                         imageView.image = catPic
