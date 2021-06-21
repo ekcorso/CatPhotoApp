@@ -8,7 +8,7 @@
 import UIKit
 
 class ViewController: UIViewController {
-    var catPic: ImageInfo?
+    var catPic: UIImage? = UIImage()
     var imageView = UIImageView()
 
     override func viewDidLoad() {
@@ -18,7 +18,8 @@ class ViewController: UIViewController {
         fetchImage(with: url)
         
         imageView.translatesAutoresizingMaskIntoConstraints = false
-        imageView.backgroundColor = .blue
+//        imageView.image = catPic
+        //imageView.backgroundColor = .blue
         view.addSubview(imageView)
         
         NSLayoutConstraint.activate([
@@ -31,13 +32,26 @@ class ViewController: UIViewController {
     
     func fetchImage(with url: String) {
         let decoder = JSONDecoder()
-        
-        if let url = URL(string: url) {
-            if let data = try? Data(contentsOf: url) {
-                if let imageResult = try? decoder.decode(ImageInfo.self, from: data) {
-                    catPic = imageResult
+        do {
+            let data = try Data(contentsOf: URL(string: url)!)
+            let imageURL = try decoder.decode(ImageInfo.self, from: data)
+            let result = imageURL.results[0].urls.regularUrl
+            let urlRequest = URLRequest(url: result)
+            
+            URLSession.shared.dataTask(with: urlRequest) { [self] (data, response, error) in
+                if let error = error {
+                    print("Error: \(error)")
+                    } else if let data = data {
+                    DispatchQueue.main.async {
+                        self.catPic = UIImage(data: data)!
+                        imageView.image = catPic
+                    }
+                } else {
+                    print("couldn't unwrap data")
                 }
-            }
+            }.resume()
+        } catch {
+            print("\(error)")
         }
     }
 }

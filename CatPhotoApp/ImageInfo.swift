@@ -8,12 +8,16 @@
 import Foundation
 
 struct ImageInfo: Codable {
+    let results: [Results]
+}
+
+struct Results: Codable {
     let urls: Urls
 }
 
 struct Urls: Codable {
     let regular: String
-    var regularString: URL {
+    var regularUrl: URL {
         return URL(string: regular)!
     }
 }
