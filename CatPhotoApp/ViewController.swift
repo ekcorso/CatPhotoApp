@@ -22,6 +22,8 @@ class ViewController: UIViewController {
         imageView.clipsToBounds = true
         view.addSubview(imageView)
         
+        navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Refresh", style: .plain, target: self, action: #selector(getNewPic))
+        
         NSLayoutConstraint.activate([
             imageView.topAnchor.constraint(equalTo: view.layoutMarginsGuide.topAnchor),
             imageView.leadingAnchor.constraint(equalTo: view.layoutMarginsGuide.leadingAnchor),
@@ -53,6 +55,10 @@ class ViewController: UIViewController {
         } catch {
             print("\(error)")
         }
+    }
+    
+    @objc func getNewPic() {
+        //refresh + get new pic?
     }
 }
 
