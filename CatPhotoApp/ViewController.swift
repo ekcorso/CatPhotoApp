@@ -8,14 +8,14 @@
 import UIKit
 
 class ViewController: UIViewController {
-    var catPic: UIImage? = UIImage()
+    var catPics: [UIImage] = [UIImage]()
     var imageView = UIImageView()
 
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        let url = "https://api.unsplash.com/search/photos/?client_id=i8PFHx5ySE0_QEwoqPtkSu23nvCqlZpRsAvgUhWntrQ&query=kitten&per_page=1"
-        fetchImage(with: url)
+        let url = URL(string: "https://api.unsplash.com/search/photos/?client_id=i8PFHx5ySE0_QEwoqPtkSu23nvCqlZpRsAvgUhWntrQ&query=kitten&per_page=30")!
+        fetchImages(with: url)
         
         imageView.translatesAutoresizingMaskIntoConstraints = false
         imageView.contentMode = .scaleAspectFill
@@ -32,33 +32,44 @@ class ViewController: UIViewController {
         ])
     }
     
-    func fetchImage(with url: String) {
+    func fetchImages(with url: URL) {
         let decoder = JSONDecoder()
+        
         do {
-            let data = try Data(contentsOf: URL(string: url)!)
+            let data = try Data(contentsOf: url)
             let imageURL = try decoder.decode(ImageInfo.self, from: data)
-            let result = imageURL.results[0].urls.regularUrl
-            let urlRequest = URLRequest(url: result)
+            let resultsArray = imageURL.results
             
-            URLSession.shared.dataTask(with: urlRequest) { [self] (data, response, error) in
-                if let error = error {
-                    print("Error: \(error)")
-                } else if let data = data {
-                    DispatchQueue.main.async {
-                        self.catPic = UIImage(data: data)!
-                        imageView.image = catPic
+            for result in resultsArray {
+                let url = result.urls.regularUrl
+                let urlRequest = URLRequest(url: url)
+                
+                URLSession.shared.dataTask(with: urlRequest) { [self] (data, response, error) in
+                    if let error = error {
+                        print("Error: \(error)")
+                    } else if let data = data {
+                        DispatchQueue.main.async {
+                            let catPic = UIImage(data: data)!
+                            catPics.append(catPic)
+                            imageView.image = catPics[0]
+                        }
+                    } else {
+                        print("couldn't unwrap data")
                     }
-                } else {
-                    print("couldn't unwrap data")
-                }
-            }.resume()
+                }.resume()
+            }
         } catch {
             print("\(error)")
         }
     }
     
     @objc func getNewPic() {
-        //refresh + get new pic?
+        var catPicsIterator = catPics.makeIterator()
+        let nextCat = catPicsIterator.next()
+        DispatchQueue.main.async { [self]
+            self.imageView.image = nextCat!
+            print("async")
+        }
+        print("tried to refresh")
     }
 }
-
